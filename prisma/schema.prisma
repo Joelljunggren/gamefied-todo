@@ -12,3 +12,42 @@ datasource db {
   provider = "postgresql"
 }
 
+model Daily {
+  id Int @id @default(autoincrement())
+  date DateTime @unique
+  dailyScore Float?
+  completed Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  todos Todo[]
+}
+
+model Todo {
+  id Int @id @default(autoincrement())
+  description String
+  estimatedTime Int
+  completionTime Int?
+  difficuly Difficulty
+  status TodoStatus @default(NOT_STARTED)
+  totalScore Float?
+  startedAt DateTime?
+  completedAt DateTime?
+  dailyId Int
+  daily Daily @relation(fields:[dailyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum TodoStatus {
+  NOT_STARTED
+  RUNNING
+  PAUSED
+  COMPLETED
+}
+

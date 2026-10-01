@@ -1,4 +1,4 @@
-import { createTodo } from "@/app/actions/todo";
+import { createTodo } from "@/app/actions/todos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

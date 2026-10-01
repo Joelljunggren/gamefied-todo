@@ -1,5 +1,6 @@
 "use server";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function createTodo(formData: FormData) {
   const description = formData.get("description") as string;
@@ -31,6 +32,6 @@ export async function createTodo(formData: FormData) {
       },
     },
   });
-
+  revalidatePath("/");
   console.log("Created todo:", todo);
 }

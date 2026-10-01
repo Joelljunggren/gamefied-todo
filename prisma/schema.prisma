@@ -27,7 +27,7 @@ model Todo {
   description String
   estimatedTime Int
   completionTime Int?
-  difficuly Difficulty
+  difficulty Difficulty
   status TodoStatus @default(NOT_STARTED)
   totalScore Float?
   startedAt DateTime?

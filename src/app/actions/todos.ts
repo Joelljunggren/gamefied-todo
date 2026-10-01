@@ -35,3 +35,13 @@ export async function createTodo(formData: FormData) {
   revalidatePath("/");
   console.log("Created todo:", todo);
 }
+
+export async function deleteTodo(id: number) {
+  await prisma.todo.delete({
+    where: {
+      id,
+    },
+  });
+
+  revalidatePath("/");
+}

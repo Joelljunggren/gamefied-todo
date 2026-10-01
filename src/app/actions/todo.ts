@@ -9,15 +9,15 @@ export async function createTodo(formData: FormData) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const daily = await prisma.daily.findUnique({
+  const daily = await prisma.daily.upsert({
     where: {
       date: today,
     },
+    update: {},
+    create: {
+      date: today,
+    },
   });
-
-  if (!daily) {
-    throw new Error("No Daily found for today");
-  }
 
   const todo = await prisma.todo.create({
     data: {

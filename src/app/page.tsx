@@ -1,4 +1,5 @@
 import DeleteButton from "@/components/deleteButton";
+import EditTodoButton from "@/components/editTodoButton";
 import TodoForm from "@/components/todoForm";
 import { getTodos } from "@/lib/todos";
 
@@ -16,6 +17,7 @@ export default async function Home() {
               <p>{todo.estimatedTime} Minutes</p>
               <p>{todo.difficulty}</p>
               <DeleteButton id={todo.id} />
+              <EditTodoButton todo={todo} />
             </div>
           ))}
         </div>

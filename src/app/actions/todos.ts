@@ -45,3 +45,30 @@ export async function deleteTodo(id: number) {
 
   revalidatePath("/");
 }
+
+export async function updateTodo(
+  id: number,
+  description: string,
+  estimatedTime: number,
+  difficulty: "EASY" | "MEDIUM" | "HARD",
+) {
+  await prisma.todo.update({
+    where: {
+      id,
+    },
+    data: {
+      description,
+      estimatedTime,
+      difficulty,
+    },
+  });
+  revalidatePath("/");
+}
+
+//startTodo()
+
+//pauseTodo()
+
+//resumeTodo()
+
+//completeTodo()

@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "./card";
 import { Badge } from "./badge";
+import Timer from "../timer";
 
 export default async function Todo() {
   const todos = await getTodos();
@@ -36,9 +37,12 @@ export default async function Todo() {
                 </CardDescription>
               </CardHeader>
 
-              <CardFooter className="justify-end gap-2">
-                <EditTodoButton todo={todo} />
-                <DeleteButton id={todo.id} />
+              <CardFooter className="justify-between">
+                <Timer />
+                <div className="flex gap-2">
+                  <EditTodoButton todo={todo} />
+                  <DeleteButton id={todo.id} />
+                </div>
               </CardFooter>
             </Card>
           </div>

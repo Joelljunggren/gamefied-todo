@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { z } from "zod";
+import * as z from "zod";
+
 import { updateTodo } from "@/app/actions/todos";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +14,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -20,12 +21,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { CardDescription } from "@/components/ui/card";
 
 const todoSchema = z.object({
-  description: z.string().min(1, "Description is required"),
-  estimatedTime: z.number().min(1, "Estimated time must be at least 1 minute"),
-  difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
+  description: z.string().min(1, "Task description is required."),
+  estimatedTime: z
+    .number({
+      error: "Estimated completion time is required.",
+    })
+    .int("Estimated time must be a whole number.")
+    .min(1, "Estimated time must be at least 1 minute."),
+  difficulty: z.enum(["EASY", "MEDIUM", "HARD"], {
+    error: "Please select a difficulty.",
+  }),
 });
 
 type Todo = {
@@ -33,6 +47,12 @@ type Todo = {
   description: string;
   estimatedTime: number;
   difficulty: "EASY" | "MEDIUM" | "HARD";
+};
+
+type TodoFormValues = {
+  description: string;
+  estimatedTime: number;
+  difficulty: "" | "EASY" | "MEDIUM" | "HARD";
 };
 
 export default function EditTodoButton({ todo }: { todo: Todo }) {
@@ -43,7 +63,7 @@ export default function EditTodoButton({ todo }: { todo: Todo }) {
       description: todo.description,
       estimatedTime: todo.estimatedTime,
       difficulty: todo.difficulty,
-    },
+    } as TodoFormValues,
 
     validators: {
       onSubmit: todoSchema,
@@ -54,8 +74,9 @@ export default function EditTodoButton({ todo }: { todo: Todo }) {
         todo.id,
         value.description,
         value.estimatedTime,
-        value.difficulty,
+        value.difficulty as Todo["difficulty"],
       );
+
       setOpen(false);
     },
   });
@@ -67,79 +88,146 @@ export default function EditTodoButton({ todo }: { todo: Todo }) {
       </DialogTrigger>
 
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit todo</DialogTitle>
+        <DialogHeader className="mb-3">
+          <DialogTitle>Edit task</DialogTitle>
+          <CardDescription>
+            Update your task if the situation has changed.
+          </CardDescription>
         </DialogHeader>
 
         <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            form.handleSubmit();
+          id={`edit-todo-${todo.id}`}
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void form.handleSubmit();
           }}
-          className="space-y-4"
         >
-          <form.Field name="description">
-            {(field) => (
-              <div>
-                <Label htmlFor={field.name}>Description</Label>
+          <FieldGroup>
+            <form.Field name="description">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
 
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  onBlur={field.handleBlur}
-                />
-              </div>
-            )}
-          </form.Field>
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      Description of task
+                    </FieldLabel>
 
-          <form.Field name="estimatedTime">
-            {(field) => (
-              <div>
-                <Label htmlFor={field.name}>Estimated time (minutes)</Label>
+                    <Input
+                      className="text-sm"
+                      id={field.name}
+                      name={field.name}
+                      type="text"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="What needs to get done?"
+                      autoComplete="off"
+                      aria-invalid={isInvalid}
+                      required
+                    />
 
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="number"
-                  min="1"
-                  value={field.state.value}
-                  onChange={(event) =>
-                    field.handleChange(Number(event.target.value))
-                  }
-                  onBlur={field.handleBlur}
-                />
-              </div>
-            )}
-          </form.Field>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
 
-          <form.Field name="difficulty">
-            {(field) => (
-              <div>
-                <Label>Difficulty</Label>
+            <form.Field name="estimatedTime">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
 
-                <Select
-                  value={field.state.value}
-                  onValueChange={(value) =>
-                    field.handleChange(value as "EASY" | "MEDIUM" | "HARD")
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      Estimated completion time (minutes)
+                    </FieldLabel>
 
-                  <SelectContent>
-                    <SelectItem value="EASY">Easy</SelectItem>
-                    <SelectItem value="MEDIUM">Medium</SelectItem>
-                    <SelectItem value="HARD">Hard</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </form.Field>
+                    <Input
+                      className="text-sm"
+                      id={field.name}
+                      name={field.name}
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={field.state.value === 0 ? "" : field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.handleChange(value === "" ? 0 : Number(value));
+                      }}
+                      placeholder="In minutes"
+                      aria-invalid={isInvalid}
+                      required
+                    />
 
-          <Button type="submit">Save changes</Button>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
+
+            <form.Field name="difficulty">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Difficulty</FieldLabel>
+
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        field.handleChange(
+                          value as TodoFormValues["difficulty"],
+                        );
+                        field.handleBlur();
+                      }}
+                    >
+                      <SelectTrigger id={field.name} aria-invalid={isInvalid}>
+                        <SelectValue placeholder="Choose difficulty" />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="EASY">EASY</SelectItem>
+                        <SelectItem value="MEDIUM">MEDIUM</SelectItem>
+                        <SelectItem value="HARD">HARD</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
+          </FieldGroup>
+
+          <div className="mt-6 flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                form.reset();
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+
+            <Button type="submit" form={`edit-todo-${todo.id}`}>
+              Save changes
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

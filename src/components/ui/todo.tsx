@@ -13,22 +13,23 @@ import { Badge } from "./badge";
 export default async function Todo() {
   const todos = await getTodos();
   const difficultyStyles = {
-    EASY: "bg-green-100 ",
-    MEDIUM: "bg-yellow-300 ",
-    HARD: "bg-red-100 ",
+    EASY: "bg-green-950",
+    MEDIUM: "bg-yellow-950",
+    HARD: "bg-red-950",
   };
   return (
     <div className="w-full space-y-4">
       {todos.length > 0 ? (
         todos.map((todo) => (
           <div key={todo.id}>
-            <Card className="mx-auto w-full max-w-sm">
+            <Card className="mx-auto w-full max-w-sm border-border bg-card text-card-foreground shadow-sm">
               <CardHeader>
-                <CardTitle>{todo.description}</CardTitle>
-                <CardDescription className="flex justify-between items-center">
+                <CardTitle className="mb-4">{todo.description}</CardTitle>
+
+                <CardDescription className="flex items-center justify-between">
                   {todo.estimatedTime} minutes
                   <Badge
-                    className={`${difficultyStyles[todo.difficulty]} rounded-sm border border-black px-3 py-1 text-black font-semibold`}
+                    className={`${difficultyStyles[todo.difficulty]} rounded-sm px-3 py-1 font-semibold text-white text-shadow-lg p-3`}
                   >
                     {todo.difficulty}
                   </Badge>
